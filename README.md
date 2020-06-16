@@ -39,15 +39,15 @@ might.
 
 For more elaborate data analysis, pollscore can also be used interactively. A `jupyter` notebook is probably the most convenient environment to use it. Most data is represented using pandas dataframes, and all the usual pandas data analysis tools can be used on them. To get started, the following are probably useful:
 
-.. code:: python
-
-    >>> from pollscore.pollscore import Poll
-    >>> P = Poll("config")
-    >>> P.response_table() #a table of all responses
-    >>> P.match() #a dictionary displaying the matching with the course roster
-    >>> P.participation_table() #scores by participation
-    >>> P.correctness_table() #scores by correctness
-    >>> P.totals_table() #total scores (the above two summed)
-    >>> P.matched_roster() #roster of matched students
-    >>> P.roster_table() #table ready for upload
-    >>> P.write_submission() #routine that writes the submission csv file
+```python
+>>> from pollscore.pollscore import Poll
+>>> P = Poll("config")
+>>> P.response_table() #a table of all responses
+>>> P.match() #a dictionary displaying the matching with the course roster
+>>> P.participation_table() #scores by participation
+>>> P.correctness_table() #scores by correctness
+>>> P.totals_table() #total scores (the above two summed)
+>>> P.matched_roster() #roster of matched students
+>>> P.roster_table() #table ready for upload
+>>> P.write_submission() #routine that writes the submission csv file
+```
