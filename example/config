@@ -1,0 +1,45 @@
+#file locations
+pollreports=["*PollReport*.csv"]
+roster="roster.csv"
+upload="canvas_submission.csv"
+
+#roster reporting
+participation_column="Poll Participation"
+correctness_column="Poll Answer Score"
+total_column="Poll Total"
+
+#aliases and matching
+domain="@domain.edu"
+aliases={"Ryder.Ingram@other.com":"ahvil737",
+    "Maile.Dickson@other.com":"hheyb651@domain.edu"}
+ignore_responses=['Cedric.Duke@other.com', 'Rhiannon.Kaufman@other.com']
+ignore_roster=['sieyg693', 'veewj780']
+
+#scoring description
+participation=4
+correct=1
+
+### COMMENT: take care to specify lecture duration if there is more than one
+###          lecture on one day (see https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#dateoffset-objects)
+### COMMENT: Specifying correct answers as a string works for single-letter responses. Multiple correct answers can be specified
+###          by writing multiple characters. Answers for consecutive questions are separated by a comma.
+
+session("2020-06-05 11:00:00; 90min","A,A,B,A")
+session("2020-06-05 14:30:00; 90min","AB,E,A")
+
+### COMMENT: you can specify correct answers by question label
+###          answers accepted as correct do not need to be single characters
+###          and multiple answers can be specified as a set.
+###          non-default scores are also possible (given in the order participation, correct)
+###          Specifying no correct answer makes the question participation-only.
+
+session("2020-06-08")
+question("P1","A")
+question("P2","Yes")
+question("P3",{"A","B"},2,2)
+question("P4","E")
+question("P5")
+session("2020-06-10", "c,a,c,c,b")
+session("2020-06-12", "A,AB,A,AB")
+session("2020-06-15", "CD,ADE,E")
+session("2020-06-17", "A,B,C,D,E")
