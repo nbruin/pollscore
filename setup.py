@@ -12,7 +12,7 @@ setuptools.setup(
     description="Score and process online poll reports for upload in a course management system",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/pypa/sampleproject",
+    url="https://github.com/nbruin/pollscore",
     packages=setuptools.find_packages(),
     install_requires=[
         'pandas',
