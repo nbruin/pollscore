@@ -115,7 +115,8 @@ class Poll:
             #other formats would need to be supported here separately.
             if open(f,encoding='utf-8-sig').readline()=="#,User Name,User Email,Submitted Date/Time,\n":
                 table = pd.read_csv(f,skiprows=1,header=None,usecols=[2,3,4,5],
-                        names=["email","time","question","answer"],parse_dates=["time"])
+                        names=["email","time","question","answer"],parse_dates=["time"],
+                        na_filter=False)
                 poll_report.append(table)
             else:
                 raise RuntimeError("Unrecognized poll report format in file '{}'".format(f))
@@ -187,8 +188,8 @@ class Poll:
             if email in self.ignore_responses:
                 return ''
             email = self.aliases.get(email) or email
-            if email in domain_emails:
-                return email[:strip]
+            if email.lower() in domain_emails:
+                return email[:strip].lower()
             else:
                 return ''
         emails=set(self.response_table().index)
@@ -233,7 +234,7 @@ class Poll:
                     print("Session {} has more correct answers specified than questions. Only using first {} answers specified.".
                         format(s,len(question_labels)))
                     answers=answers[:len(question_labels)]
-                scorer.update({(s,l):Question(s,l,d[1],d[2],set(a)) for l,a in zip(question_labels,answers)})
+                scorer.update({(s,l):Question(s,l,d[1],d[2] if a else 0,set(a)) for l,a in zip(question_labels,answers)})
                 if len(answers) < len(question_labels):
                     print("Session {} has insufficient answers specified. Scoring last {} only for participation.".format(s,len(question_labels)-len(answers)))
                     scorer.update({(s,l):Question(s,l,d[1],0,set()) for l in question_labels[len(answers):]})
