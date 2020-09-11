@@ -94,7 +94,7 @@ class Poll:
     def response_table(self):
         r"""Total table of responses.
         
-        Rows are indexed by the participan emails. Columns are multi-indexed by session
+        Rows are indexed by the participant emails. Columns are multi-indexed by session
         (given by a time period) and a poll label. It is an error to have multiple responses
         from a participant to the same question in the same session. Sessions are part of the configuration.
         In addition, the routine here will make up day-long sessions for responses that are not part of a
@@ -156,7 +156,8 @@ class Poll:
             response_table=[ql.set_index(["session","question","email"])['answer'].unstack('session').unstack("question") for s, ql in poll_report.groupby(["session"])]
         except ValueError as E:
             raise ValueError("Probably multiple responses with same participant, session, and question.") from E
-        response_table=response_table[0].join(response_table[1:])
+        response_table=pd.concat(response_table,axis=1,join='outer',sort=True)
+        response_table.index.rename('email',inplace=True)
         response_table=response_table[[(s,q) for s in sessions for q in question_order[s]]]
         
         self.sessions=sessions
