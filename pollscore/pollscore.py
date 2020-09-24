@@ -158,7 +158,15 @@ class Poll:
             raise ValueError("Probably multiple responses with same participant, session, and question.") from E
         response_table=pd.concat(response_table,axis=1,join='outer',sort=True)
         response_table.index.rename('email',inplace=True)
-        response_table=response_table[[(s,q) for s in sessions for q in question_order[s]]]
+        index=[]
+        for s in list(sessions):
+            if s in question_order:
+                for q in question_order[s]:
+                    index.append((s,q))
+            else:
+                print("Dropping session {} because it registered no responses.".format(s))
+                sessions.remove(s)
+        response_table=response_table[index]
         
         self.sessions=sessions
         self._question_order=question_order
@@ -331,11 +339,23 @@ class Poll:
             f.write(W.to_csv(index=False))
             
 def main(*args):
-    config_file="config"
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Score Zoom poll reports for upload to a course management system.")
+    parser.add_argument("files", metavar="FILE", type=str, nargs='*',
+        help = "if specified, process given report files instead of configured ones.")
+    parser.add_argument("-c","--config", type=str, default='config', help = "config file (default 'config')")
+    args = parser.parse_args()
+
+    print("args:",args)
     print("-----------\nPOLL SCORE PROCESSING\n-----------");
-    print('Processing poll configuration from file "{}"'.format(config_file))
-    P = Poll(config_file)
-    print("Configured report files: {}".format(P.reportfiles))
+    print('Processing poll configuration from file "{}"'.format(args.config))
+    P = Poll(args.config)
+    if args.files:
+        print("Report files overridden by command line argument. Working with: {}".format(args.files))
+        P.reportfiles = args.files
+    else:
+        print("Configured report files: {}".format(P.reportfiles))
     print("Configured sessions: {}".format(sorted(P.config_sessions.keys())))
     print("-----------\nRESPONSE PROCESSING\n-----------");
     P.response_table()

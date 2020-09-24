@@ -37,6 +37,24 @@ should produce some output in the terminal and a submission file ready for uploa
 
 might.
 
+The full call signature for the script is as follows.
+
+    $ pollsore -h
+    usage: pollscore [-h] [-c CONFIG] [FILE [FILE ...]]
+
+    Score Zoom poll reports for upload to a course management system.
+
+    positional arguments:
+      FILE                  if specified, process given report files instead of
+                            configured ones.
+
+    optional arguments:
+      -h, --help            show this help message and exit
+      -c CONFIG, --config CONFIG
+                            config file (default 'config')
+
+The option for overriding the response files to be processed is mainly to have a quick way of checking the matching results on a single poll report file.
+
 For more elaborate data analysis, pollscore can also be used interactively. A `jupyter` notebook is probably the most convenient environment to use it. Most data is represented using pandas dataframes, and all the usual pandas data analysis tools can be used on them. To get started, the following are probably useful:
 
 ```python
