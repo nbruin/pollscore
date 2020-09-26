@@ -365,6 +365,10 @@ def main(*args):
     P.matched_roster()
     print("-----------\nWRITING SCORE FILE\n-----------");
     P.write_submission()
+    maxscores = P.roster_table().iloc[0]
+    for col in [P._participation_column, P._correctness_column, P._total_column]:
+        if col:
+            print("Maximum {}: {}".format(col,maxscores[col]))
     print("Report in {} is ready for upload".format(P.uploadfile))
     
 
