@@ -117,6 +117,8 @@ class Poll:
                 table = pd.read_csv(f,skiprows=1,header=None,usecols=[2,3,4,5],
                         names=["email","time","question","answer"],parse_dates=["time"],
                         na_filter=False)
+                #normalize email case in the event people have used variants
+                table.email = table.email.str.lower()
                 poll_report.append(table)
             else:
                 raise RuntimeError("Unrecognized poll report format in file '{}'".format(f))
