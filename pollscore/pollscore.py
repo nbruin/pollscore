@@ -108,20 +108,26 @@ class Poll:
         #we collect all poll reports in one dataframe for further analysis
         poll_report=[]
         for f in self.reportfiles:
+            #zoom poll reports have two different formats: from 2021 they start with
+            #"Poll Report" and then have several introductory lines before the header
+            #line for the response table occurs. Before, the header line was the first one.
+            #we check for either and then flush all lines up to and including the
+            #header line.
             #zoom poll reports have insufficient columns in the header line,
             #which throws off pandas autodetect.
-            #we check the header line explicitly and on match, parse the table
-            #with explicitly mentioned column numbers and column labels.
             #other formats would need to be supported here separately.
-            if open(f,encoding='utf-8-sig').readline()=="#,User Name,User Email,Submitted Date/Time,\n":
-                table = pd.read_csv(f,skiprows=1,header=None,usecols=[2,3,4,5],
+            with open(f,encoding='utf-8-sig') as handle:
+                line = handle.readline()
+                if line != "Poll Report\n" and line != "#,User Name,User Email,Submitted Date/Time,\n":
+                    raise RuntimeError("Unrecognized poll report format in file '{}'".format(f))
+                while line != "#,User Name,User Email,Submitted Date/Time,\n":
+                    line = handle.readline()
+                table = pd.read_csv(handle,header=None,usecols=[2,3,4,5],
                         names=["email","time","question","answer"],parse_dates=["time"],
                         na_filter=False)
                 #normalize email case in the event people have used variants
                 table.email = table.email.str.lower()
                 poll_report.append(table)
-            else:
-                raise RuntimeError("Unrecognized poll report format in file '{}'".format(f))
         poll_report=pd.concat(poll_report,ignore_index=True)
         self.poll_report=poll_report
         #next: determine sessions. Take sessions from configuration
