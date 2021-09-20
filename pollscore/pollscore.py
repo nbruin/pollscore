@@ -2,6 +2,7 @@ import pandas as pd
 import glob
 from pollscore.period import Period
 import pollscore.confmod as confmod
+from io import StringIO
 
 roster_ID="SIS Login ID"
 PointsPossibleID='000-PointsPossible'
@@ -118,13 +119,52 @@ class Poll:
             #other formats would need to be supported here separately.
             with open(f,encoding='utf-8-sig') as handle:
                 line = handle.readline()
+
+                #basic format identifier from the first line
                 if line != "Poll Report\n" and line != "#,User Name,User Email,Submitted Date/Time,\n":
                     raise RuntimeError("Unrecognized poll report format in file '{}'".format(f))
-                while line != "#,User Name,User Email,Submitted Date/Time,\n":
+                #we assume we're looking at a legal poll report. We need to look at a line lower down
+                #to further determine the version.
+                while not line.startswith("#,User Name,User Email,Submitted Date/Time"):
+                    if not line:
+                        raise RuntimeError("No poll response header found in file '{}'".format(f))
                     line = handle.readline()
-                table = pd.read_csv(handle,header=None,usecols=[2,3,4,5],
-                        names=["email","time","question","answer"],parse_dates=["time"],
-                        na_filter=False)
+
+                #split according to versions
+                if line == "#,User Name,User Email,Submitted Date/Time,\n":
+                    #Pre Sept. 20, 2021 format does not list question number in header, so the header ends with a comma
+                    #the responses are (question,answer) pairs.
+                    table = pd.read_csv(handle,header=None,usecols=[2,3,4,5],
+                            names=["email","time","question","answer"],parse_dates=["time"],
+                            na_filter=False)
+                else:
+                    #Post Sept. 20, 2021 the CSV table actually consists of 1 or more subtables, each with their own
+                    #header line with the question in it. We split our input into these subtables
+                    #and parse them separately.
+                    buffer=[]
+                    table=[]
+                    question = line[line.rindex(",")+1:-1]
+                    while True:
+                        line = handle.readline()
+                        if line.startswith('#,User Name,User Email,Submitted Date/Time,') or not(line):
+                            subtable = pd.read_csv(
+                                StringIO(''.join(buffer)),
+                                header=None,
+                                usecols=[2,3,4],
+                                names=["email","time","answer"],
+                                parse_dates=["time"],
+                                na_filter=False,
+                            )
+                            buffer = []
+                            subtable['question']=question
+                            table.append(subtable)
+                            if line:
+                                question = line[line.rindex(",")+1:-1]
+                            else:
+                                break #EOF
+                        else:
+                            buffer.append(line)
+                    table = pd.concat(table,ignore_index=True)
                 #normalize email case in the event people have used variants
                 table.email = table.email.str.lower()
                 poll_report.append(table)
