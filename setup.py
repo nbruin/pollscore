@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="pollscore-nbruin",
-    version="0.0.1",
+    version="1.0",
     author="Nils Bruin",
     author_email="nbruin@sfu.ca",
     license="MIT",
