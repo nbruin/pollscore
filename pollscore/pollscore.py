@@ -109,7 +109,7 @@ class Poll:
         #we collect all poll reports in one dataframe for further analysis
         poll_report=[]
         for f in self.reportfiles:
-            #zoom poll reports have two different formats: from 2021 they start with
+            #zoom poll reports have two different formats: from 2021 they start withguan
             #"Poll Report" and then have several introductory lines before the header
             #line for the response table occurs. Before, the header line was the first one.
             #we check for either and then flush all lines up to and including the
@@ -203,6 +203,10 @@ class Poll:
         try:
             response_table=[ql.set_index(["session","question","email"])['answer'].unstack('session').unstack("question") for s, ql in poll_report.groupby(["session"])]
         except ValueError as E:
+            dup = poll_report.duplicated({'email','question','session'},keep=False)
+            print("Duplicate entries found\n-------------")
+            print(poll_report[dup])
+            print("-------------")
             raise ValueError("Probably multiple responses with same participant, session, and question.") from E
         response_table=pd.concat(response_table,axis=1,join='outer',sort=True)
         response_table.index.rename('email',inplace=True)
